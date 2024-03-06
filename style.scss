@@ -1,0 +1,44 @@
+*{
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+input[type=file]{
+    display: none;
+}
+
+body {
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none
+  }
+
+.container{
+    padding: 20px;
+    background-color: #eee;
+    height: 600px;
+}
+
+.btn-upload{
+    display: block;
+    width: 200px;
+    height: 200px;
+    padding: 20px;
+    border: 7px dashed grey;
+    border-radius: 20px;
+
+    &:hover{
+        background-color: white;
+        cursor: pointer;
+    }
+}
+
+.img-uploaded{
+    width: 200px;
+    height: 200px;
+
+    img{
+        width: 100%;
+    }
+}
