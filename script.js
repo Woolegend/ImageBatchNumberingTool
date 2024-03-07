@@ -1,38 +1,47 @@
-import JSZip from 'jszip';
+// import JSZip from 'jszip';
 // const JSZip = require('jszip');
 
-let imageBlobs = [];
-let title = '';
+const previewContainer = document.querySelector('.preview-container');
+const uploadContainer = document.querySelector('.upload-container');
+const cardContainer = document.querySelector('.card-container');
 
-document.querySelector('#title').addEventListener('change', function(){
+
+let img = document.querySelector('.preview-display img');
+let imageUrls = [];
+let images = [];
+let title = '';
+let startNumber = 0;
+let currentPage = 0;
+
+document.querySelector('#title').addEventListener('change', function () {
     title = this.value;
+    previewImagesLoad();
+})
+
+document.querySelector('#start-number').addEventListener('change', e => {
+    startNumber = e.target.value
+    previewImagesLoad();
 })
 
 document.querySelector('.btn-upload').addEventListener('dragover', e => {
     e.preventDefault();
 
-    var vaild = e.dataTransfer.types.indexOf('Files') >= 0;
-    console.log(vaild);
+    // var vaild = e.dataTransfer.types.indexOf('Files') >= 0;
+    // console.log(vaild);
 });
 
 document.querySelector('.btn-upload').addEventListener('drop', e => {
     e.preventDefault();
+
     let file = e.dataTransfer.files[0];
     const reader = new FileReader();
-
     reader.readAsDataURL(file);
 
     reader.addEventListener('load', function () {
-
-        saveImageAsBlob(reader.result);
-
-        console.log(imageBlobs);
+        saveImageAsUrl(reader.result);
+        setTimeout(pageDown, 100);
     })
 });
-
-document.querySelector('#download').addEventListener('click', function() {
-    downloadImagesAsZip();
-})
 
 function dataURLtoBlob(dataurl) {
     var arr = dataurl.split(','),
@@ -48,7 +57,7 @@ function dataURLtoBlob(dataurl) {
     });
 }
 
-function saveImageAsBlob(imgSrc) {
+function saveImageAsUrl(imgSrc) {
     var image = new Image();
     image.crossOrigin = "anonymous";
     image.src = imgSrc;
@@ -58,14 +67,79 @@ function saveImageAsBlob(imgSrc) {
         canvas.width = this.width;
         canvas.height = this.height;
         canvas.getContext('2d').drawImage(this, 0, 0);
-        document.body.append(canvas);
 
-        imageBlobs.push(dataURLtoBlob(canvas.toDataURL()));
+        imageUrls.push(canvas.toDataURL());
+
+        previewImagesLoad();
     };
 }
 
-function downloadImagesAsForder(){
 
+function downloadImagesAsForder() {
+    // let fileHandler = new ActiveXObject("Scripting.fileSystemObject");
+    // fileHandler.createFolder(title);
+}
+
+function previewImagesLoad() {
+    cardContainer.innerHTML = '';
+    images = [];
+    const last = imageUrls.length - 1;
+
+    for (let i = 0; i <= last; i++) {
+        images[i] = new Image();
+        images[i].src = imageUrls[i];
+        let newPage = Number(startNumber) + i;
+
+        let cardLayout = `
+        <div id="page-${newPage}" class="uploaded-card" draggable="true">
+            <img src="${images[i].src}" draggable="false">
+            <div class="card-body">
+                <h4>${title + ' '}${newPage}.png</h4>
+                <p></p>
+                <button class="remove">삭제</button>
+            </div>
+        </div>`;
+
+        cardContainer.insertAdjacentHTML('beforeend', cardLayout);
+
+        document.querySelector(`#page-${newPage}`).addEventListener('click', e => {
+            pageTo(i);
+        })
+
+        document.querySelector(`#page-${newPage} .remove`).addEventListener('click', e => {
+            e.stopPropagation();
+           imageUrls.splice(i, 1);
+           previewImagesLoad();
+        })
+    }
+
+    document.querySelector('.preview-empty').style = 'display : none;';
+    pageTo(last);
+}
+
+img.addEventListener('click', e => {
+    if (images.length < 2) return;
+
+    let centerX = e.target.width / 2;
+    let clickX = e.offsetX;
+
+    if (clickX < centerX) { currentPage-- }
+    else { currentPage++ }
+
+    if (currentPage < 0) { currentPage = images.length - 1 }
+    else if (currentPage == images.length) { currentPage = 0 }
+
+    img.src = images[currentPage].src;
+})
+
+function pageTo(page){
+    if(page < 0) {
+        document.querySelector('.preview-empty').style = 'display : block;';
+        img.src = '';
+        return;
+    }
+    currentPage = page;
+    img.src = images[currentPage].src;
 }
 
 // function downloadImagesAsZip() {
@@ -87,3 +161,21 @@ function downloadImagesAsForder(){
 //         });
 //     });
 // }
+
+
+document.querySelector('#download').addEventListener('click', function () {
+    // downloadImagesAsForder();
+    // downloadImagesAsZip();
+    pageDown();
+})
+
+
+
+function pageUp() {
+    window.scrollTo(0, 0);
+}
+
+function pageDown() {
+    // window.scrollTo(0, document.body.scrollHeight);
+    window.scroll({ top: document.body.scrollHeight, behavior: 'smooth' });
+}

@@ -1,25 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
+
 <body>
-    
-    <div class="container">
-        <div class="img-container">
+    <nav>
+        <div class="container">
+            <h1>Numbering Tool</h1>
             <input id="title" type="text">
+            <input id="start-number" type="number">
             <button id="download">다운</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="preview-container">
+            <div class="preview-display">
+                <div class="preview-empty">이미지를 입력하세요</div>
+                <img src="" draggable="false">
+            </div>
+        </div>
+
+        <div class="upload-container">
+            <div class="card-container"></div>
             <label class="btn-upload">
                 이미지 선택
                 <input type="file" class="" accept="image/*">
             </label>
+            <div></div>
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
-    
+    <script src="script.js"></script>
+
 </body>
+
 </html>
