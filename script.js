@@ -1,36 +1,37 @@
 // import JSZip from 'jszip';
 // const JSZip = require('jszip');
 
+// 이미지 미리보기 컨테이너
 const previewContainer = document.querySelector('.preview-container');
+// 이미지 올리기 컨테이너
 const uploadContainer = document.querySelector('.upload-container');
+// 이미지 카드 컨테이너
 const cardContainer = document.querySelector('.card-container');
+// 파일 제목 입력
+const fileTitleInput = document.querySelector('#preview-utils .title');
+// 페이지 셀렉터
+const pageSelecter = document.querySelector('#preview .page');
 
-
+// 현재 미리보기 이미지
 let img = document.querySelector('.preview-display img');
+// 이미지 URL 배열
 let imageUrls = [];
+// 이미지 저장 배열
 let images = [];
-let title = '';
-let startNumber = 0;
+// 현재 미리보기 이미지 번호
 let currentPage = 0;
+// 파일 제목
+let fileTitle = 'NewFile';
 
-document.querySelector('#title').addEventListener('change', function () {
-    title = this.value;
-    previewImagesLoad();
+document.addEventListener('dragstart', e => {
+    console.log('start');
 })
 
-document.querySelector('#start-number').addEventListener('change', e => {
-    startNumber = e.target.value
-    previewImagesLoad();
-})
-
-document.querySelector('.btn-upload').addEventListener('dragover', e => {
+document.querySelector('html').addEventListener('dragover', e => {
     e.preventDefault();
-
-    // var vaild = e.dataTransfer.types.indexOf('Files') >= 0;
-    // console.log(vaild);
 });
 
-document.querySelector('.btn-upload').addEventListener('drop', e => {
+document.querySelector('html').addEventListener('drop', e => {
     e.preventDefault();
 
     let file = e.dataTransfer.files[0];
@@ -43,6 +44,21 @@ document.querySelector('.btn-upload').addEventListener('drop', e => {
     })
 });
 
+
+fileTitleInput.addEventListener('change', e => {
+    fileTitle = e.target.value;
+    if(fileTitle == ''){
+        fileTitle = 'NewFile';
+    }
+    previewImagesLoad();
+})
+
+
+/**
+ * URL을 Blob으로 변환하여 반환한다.
+ * @param {string} dataurl 
+ * @returns Blob
+ */
 function dataURLtoBlob(dataurl) {
     var arr = dataurl.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
@@ -57,6 +73,11 @@ function dataURLtoBlob(dataurl) {
     });
 }
 
+
+/**
+ * 이미지 URL을 imageURLs 배열에 추가한다.
+ * @param {string} imgSrc 암호화된 이미지 url
+ */
 function saveImageAsUrl(imgSrc) {
     var image = new Image();
     image.crossOrigin = "anonymous";
@@ -75,11 +96,9 @@ function saveImageAsUrl(imgSrc) {
 }
 
 
-function downloadImagesAsForder() {
-    // let fileHandler = new ActiveXObject("Scripting.fileSystemObject");
-    // fileHandler.createFolder(title);
-}
-
+/**
+ * 미리보기 이미지를 최신화한다.
+ */
 function previewImagesLoad() {
     cardContainer.innerHTML = '';
     images = [];
@@ -88,13 +107,13 @@ function previewImagesLoad() {
     for (let i = 0; i <= last; i++) {
         images[i] = new Image();
         images[i].src = imageUrls[i];
-        let newPage = Number(startNumber) + i;
+        let newTitle = fileTitle + ' ' + i;
 
         let cardLayout = `
-        <div id="page-${newPage}" class="uploaded-card" draggable="true">
+        <div id="page-${i}" class="uploaded-card" draggable="true">
             <img src="${images[i].src}" draggable="false">
             <div class="card-body">
-                <h4>${title + ' '}${newPage}.png</h4>
+                <h4>${newTitle}.png</h4>
                 <p></p>
                 <button class="remove">삭제</button>
             </div>
@@ -102,11 +121,11 @@ function previewImagesLoad() {
 
         cardContainer.insertAdjacentHTML('beforeend', cardLayout);
 
-        document.querySelector(`#page-${newPage}`).addEventListener('click', e => {
+        document.querySelector(`#page-${i}`).addEventListener('click', e => {
             pageTo(i);
         })
 
-        document.querySelector(`#page-${newPage} .remove`).addEventListener('click', e => {
+        document.querySelector(`#page-${i} .remove`).addEventListener('click', e => {
             e.stopPropagation();
            imageUrls.splice(i, 1);
            previewImagesLoad();
@@ -132,6 +151,11 @@ img.addEventListener('click', e => {
     img.src = images[currentPage].src;
 })
 
+
+/**
+ * 미리보기 이미지를 전환한다.
+ * @param {number} page 미리보기 이미지 번호
+ */
 function pageTo(page){
     if(page < 0) {
         document.querySelector('.preview-empty').style = 'display : block;';
@@ -142,40 +166,10 @@ function pageTo(page){
     img.src = images[currentPage].src;
 }
 
-// function downloadImagesAsZip() {
-//     var zip = new JSZip();
-
-//     var promises = imageBlobs.map(function (imageBlob, index) {
-//         return new Promise(function (resolve) {
-//             var titleWithIndex = title + '_' + index;
-//             zip.file(titleWithIndex, imageBlob);
-//             resolve();
-//         });
-//     });
-
-//     console.dir(promises);
-
-//     Promise.all(promises).then(function () {
-//         zip.generateAsync({ type: 'blob' }).then(function (blob) {
-//             saveAs(blob, 'images.zip');
-//         });
-//     });
-// }
-
-
-document.querySelector('#download').addEventListener('click', function () {
-    // downloadImagesAsForder();
-    // downloadImagesAsZip();
-    pageDown();
-})
-
-
-
 function pageUp() {
     window.scrollTo(0, 0);
 }
 
 function pageDown() {
-    // window.scrollTo(0, document.body.scrollHeight);
     window.scroll({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
